@@ -1,5 +1,5 @@
-markdown: rdiscount
-pygments: true
+#markdown: rdiscount
+#pygments: true
 
 permalink: /:title/
 url: http://janseon.github.io
