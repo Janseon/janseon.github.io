@@ -1,16 +1,19 @@
-markdown: rdiscount
 permalink: /:title/
-url: http://hustcat.github.io
-name: YY哥
-author: hustcat
-qq: 
-email: hustcat@gmail.com
-duoshuo: hustcat
-beian: 
-cnzz: 
-weibo: hustcat
-github: hustcat
-pygments: true
+url: http://janseon.github.io
+name: Janseon
+author: Janseon
+qq:
+email: janseon@gmail.com
+github: janseon
+duoshuo: janseon
+beian:
+cnblogs:
+cnzz:
+weibo: janseon
+
+gems: [jekyll-paginate]
 paginate: 20
 truncate: true
-about: "YY哥(hustcat)"
+about: "大兴兴 (Janseon)"
+
+
