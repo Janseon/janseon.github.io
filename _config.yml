@@ -1,3 +1,6 @@
+markdown: rdiscount
+pygments: true
+
 permalink: /:title/
 url: http://janseon.github.io
 name: Janseon
@@ -15,5 +18,6 @@ gems: [jekyll-paginate]
 paginate: 20
 truncate: true
 about: "大兴兴 (Janseon)"
+
 
 
