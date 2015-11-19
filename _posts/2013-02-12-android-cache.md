@@ -29,7 +29,7 @@ android系统中读取位图Bitmap时。分给虚拟机中图片的堆栈大小�
         }
         System.gc();
     }
-{% endhighlinght %}
+{% endhighlight %}
 
 我们还可以了解一下davlik虚拟机的内存管理相关的知识：
 
@@ -70,25 +70,25 @@ android系统中读取位图Bitmap时。分给虚拟机中图片的堆栈大小�
 下面是我研究之后得到的一些缓存的策略，大家可以参考参考，也可以改进改进……
 
 {% highlight java linenos %}
-	public Bitmap getPhoto(String photoUrl, boolean isSave, boolean isLoad,
-			boolean toCompress) {
-		Log.d(TAG, "getPhoto=" + photoUrl);
-		String fileName = FileManage.getFileNameFromPath(photoUrl);
-		Bitmap bitmap = null;
-		BitmapCache bitmapCache = bitmapCacheBin.get(fileName);
-		if (bitmapCache != null && bitmapCache.isCompressed == toCompress) {
-			Log.d(TAG, "bitmapCacheBin");
-			return bitmapCache.bitmap;
-		}
-		if (isLoad) {
-			bitmap = loadSDCardCachePhoto(fileName, toCompress);
-			if (bitmap != null) {
-				Log.d(TAG, "loadSDCardCachePhoto");
-				return bitmap;
-			}
-		}
-		return loadHttpPhoto(photoUrl, fileName, isSave, toCompress);
-	}
+    public Bitmap getPhoto(String photoUrl, boolean isSave, boolean isLoad,
+            boolean toCompress) {
+        Log.d(TAG, "getPhoto=" + photoUrl);
+        String fileName = FileManage.getFileNameFromPath(photoUrl);
+        Bitmap bitmap = null;
+        BitmapCache bitmapCache = bitmapCacheBin.get(fileName);
+        if (bitmapCache != null && bitmapCache.isCompressed == toCompress) {
+            Log.d(TAG, "bitmapCacheBin");
+            return bitmapCache.bitmap;
+        }
+        if (isLoad) {
+            bitmap = loadSDCardCachePhoto(fileName, toCompress);
+            if (bitmap != null) {
+                Log.d(TAG, "loadSDCardCachePhoto");
+                return bitmap;
+            }
+        }
+        return loadHttpPhoto(photoUrl, fileName, isSave, toCompress);
+    }
 {% endhighlight %}
 
 getPhoto()方法是获取图片资源的函数，返回值为Bitmap对象。
@@ -98,36 +98,36 @@ getPhoto()方法首先通过调用bitmapCacheBin.get(fileName)方法来检测是
 如果不存在该缓存，那么就通过调用loadSDCardCachePhoto(fileName, toCompress)来检测本地磁盘是否存在该缓存文件，同样是由fileName字符串来唯一标志这个缓存文件。如果存在就从本地加载进内存，并且返回对应的Bitmap对象。事实上，加载进内存的时候，还需要做的是，把该Bitmap以内存缓存的形式放进bitmapCacheBin缓存箱里面，且看：
 
 {% highlight java linenos %}
-	public Bitmap loadSDCardCachePhoto(String fileName, boolean toCompress) {
-		String filePath = null;
-		if (toCompress) {
-			filePath = CacheManage.getCacheFilePath("pic", fileName); // 缓存加载
-		} else {
-			filePath = CacheManage.getCacheFilePath("src_pic", fileName); // 缓存加载
-		}
-		BitmapCache bitmapCache = new BitmapCache(filePath, toCompress);
-		if (bitmapCache.bitmap != null) {
-			bitmapCacheBin.put(fileName, bitmapCache);
-		}
-		return bitmapCache.bitmap;
-	}
+    public Bitmap loadSDCardCachePhoto(String fileName, boolean toCompress) {
+        String filePath = null;
+        if (toCompress) {
+            filePath = CacheManage.getCacheFilePath("pic", fileName); // 缓存加载
+        } else {
+            filePath = CacheManage.getCacheFilePath("src_pic", fileName); // 缓存加载
+        }
+        BitmapCache bitmapCache = new BitmapCache(filePath, toCompress);
+        if (bitmapCache.bitmap != null) {
+            bitmapCacheBin.put(fileName, bitmapCache);
+        }
+        return bitmapCache.bitmap;
+    }
 {% endhighlight %}
 
 其中，new BitmapCache(filePath, toCompress)生成一个Bitmap的缓存对象，这个对象是通过文件路径从本地磁盘寻找相应的文件文件并且加载进来的：
 
 {% highlight java linenos %}
-	public BitmapCache(String pathName, boolean toCompress) {
-		Options options = new Options();
-		bitmap = BitmapFactory.decodeFile(pathName, options);
-		if (bitmap != null && toCompress) {
-			bitmap = BitmapUtil.reduceImage(bitmap);
-			isCompressed = true;
-		}
-		if (bitmap != null) {
-			calculateByteCount(options.inPreferredConfig);
-			this.pathName = pathName;
-		}
-	}
+    public BitmapCache(String pathName, boolean toCompress) {
+        Options options = new Options();
+        bitmap = BitmapFactory.decodeFile(pathName, options);
+        if (bitmap != null && toCompress) {
+            bitmap = BitmapUtil.reduceImage(bitmap);
+            isCompressed = true;
+        }
+        if (bitmap != null) {
+            calculateByteCount(options.inPreferredConfig);
+            this.pathName = pathName;
+        }
+    }
 {% endhighlight %}
 
 生成一个缓存对象之后，就通过bitmapCacheBin.put(fileName, bitmapCache)，把这个对象加进去bitmapCacheBin缓存箱里面去。
@@ -135,21 +135,21 @@ getPhoto()方法首先通过调用bitmapCacheBin.get(fileName)方法来检测是
 如果在本地磁盘上没有找到相应的缓存文件，那么就会通过调用loadHttpPhoto(photoUrl, fileName, isSave, toCompress)，从网络上去获取相应的图片，如果从网络上把图片获取回来之后，就会对返回来的图片进行缓存，并且返回相应的Bitmap，且看：
 
 {% highlight java linenos %}
-	public Bitmap loadHttpPhoto(String photoUrl, String fileName,
-			boolean isSave, boolean toCompress) {
-		InputStream in = HttpClient.getInputStream(URLString.getURLBase()
-				+ photoUrl);
-		if (in != null) {
-			BitmapCache bitmapCache = new BitmapCache(in, toCompress);
-			if (isSave) {
-				saveCachePhoto(bitmapCache.bitmap, fileName, toCompress);
-			}
-			bitmapCacheBin.put(fileName, bitmapCache);
-			Log.d(TAG, "loadHttpPhoto");
-			return bitmapCache.bitmap;
-		}
-		return null;
-	}
+    public Bitmap loadHttpPhoto(String photoUrl, String fileName,
+            boolean isSave, boolean toCompress) {
+        InputStream in = HttpClient.getInputStream(URLString.getURLBase()
+                + photoUrl);
+        if (in != null) {
+            BitmapCache bitmapCache = new BitmapCache(in, toCompress);
+            if (isSave) {
+                saveCachePhoto(bitmapCache.bitmap, fileName, toCompress);
+            }
+            bitmapCacheBin.put(fileName, bitmapCache);
+            Log.d(TAG, "loadHttpPhoto");
+            return bitmapCache.bitmap;
+        }
+        return null;
+    }
 {% endhighlight %}
 
 loadHttpPhoto()方法首先会根据图片的url，调用HttpClient.getInputStream()方法返回http的输入流，然后根据这个输入流，通过new BitmapCache(in, toCompress)生成一个Bitmap的缓存对象，并且调用saveCachePhoto()把图片保存到到本地的磁盘缓存文件，接着再调用bitmapCacheBin.put(fileName, bitmapCache)，把Bitmap的缓存对象放进缓存箱，最后再返回Bitmap对象。
@@ -161,38 +161,38 @@ loadHttpPhoto()方法首先会根据图片的url，调用HttpClient.getInputStre
 而本人所用的bitmapCacheBin缓存箱对象，是属于BitmapCacheBin类的一个实例，这个类就是参考了LruCache类，然后自己编写的。可以看看这个代码的部分实现：
 
 {% highlight java linenos %}
-	public class BitmapCacheBin {
-		private final LinkedHashMap<String, BitmapCache> map;
-		private int size;
-		private int maxSize;
-		private int putCount;
-		private int createCount;
-		private int evictionCount;
-		private int hitCount;
-		private int missCount;
-	
-		public BitmapCacheBin(int maxSize) {
-			if (maxSize <= 0) {
-				throw new IllegalArgumentException("maxSize <= 0");
-			}
-			this.maxSize = maxSize;
-			this.map = new LinkedHashMap(0, 0.75F, true);
-		}
-	
-		public final BitmapCache get(String key) {
-			//……
-		}
-		
-		public final BitmapCache put(String key, BitmapCache value) {
-			//……
-		}
-		
-		private void trimToSize(int maxSize) {
-			//……
-		}
-		
-		//……
-	}
+    public class BitmapCacheBin {
+        private final LinkedHashMap<String, BitmapCache> map;
+        private int size;
+        private int maxSize;
+        private int putCount;
+        private int createCount;
+        private int evictionCount;
+        private int hitCount;
+        private int missCount;
+    
+        public BitmapCacheBin(int maxSize) {
+            if (maxSize <= 0) {
+                throw new IllegalArgumentException("maxSize <= 0");
+            }
+            this.maxSize = maxSize;
+            this.map = new LinkedHashMap(0, 0.75F, true);
+        }
+    
+        public final BitmapCache get(String key) {
+            //……
+        }
+        
+        public final BitmapCache put(String key, BitmapCache value) {
+            //……
+        }
+        
+        private void trimToSize(int maxSize) {
+            //……
+        }
+        
+        //……
+    }
 {% endhighlight %}
 
 BitmapCacheBin类里面包括了一个带顺序的HashMap：LinkedHashMap，用于按一定顺序保存Bitmap缓存对象的。其中必须有get()、put()方法，用于取出和放进Bitmap缓存对象的；另外还需要一个trimToSize()方法来修改LinkedHashMap的内部结构，把最近最少使用的缓存对象，放在靠后的位置，或者直接释放掉。trimToSize()方法在put()方法，或者在某些情况下会调用，传入的参数是maxSize，表示这个缓存箱支持的最大的空间，这个空间与内存对应的，也与Bitmap的大小对应的，可以通过计算，互相转化。这个转化过程，可以参考以下的链接：
@@ -219,40 +219,40 @@ BitmapCacheBin类实现的主要的部分就是这些，大家可以在这个的
 回头看看新生成一个Bitmap的缓存对象的那段代码，
 
 {% highlight java linenos %}
-	public BitmapCache(String pathName, boolean toCompress) {
-		Options options = new Options();
-		bitmap = BitmapFactory.decodeFile(pathName, options);
-		if (bitmap != null && toCompress) {
-			bitmap = BitmapUtil.reduceImage(bitmap);
-			isCompressed = true;
-		}
-		if (bitmap != null) {
-			calculateByteCount(options.inPreferredConfig);
-			this.pathName = pathName;
-		}
-	}
+    public BitmapCache(String pathName, boolean toCompress) {
+        Options options = new Options();
+        bitmap = BitmapFactory.decodeFile(pathName, options);
+        if (bitmap != null && toCompress) {
+            bitmap = BitmapUtil.reduceImage(bitmap);
+            isCompressed = true;
+        }
+        if (bitmap != null) {
+            calculateByteCount(options.inPreferredConfig);
+            this.pathName = pathName;
+        }
+    }
 {% endhighlight %}
 
 其中有一个地方调用了BitmapUtil.reduceImage(bitmap)方法，这个方法的实现是：
 
 {% highlight java linenos %}
-	public static Bitmap reduceImage(Bitmap bitmap, float scale) {
-		final Bitmap oldBitmap = bitmap;
-		System.out.println(bitmap.getWidth() + "," + bitmap.getHeight());
-		bitmap = Bitmap.createScaledBitmap(oldBitmap, (int) (bitmap.getWidth()
-				* scale + 1f), (int) (bitmap.getHeight() * scale + 1f), true);
-		oldBitmap.recycle();
-		return bitmap;
-	}
-
-	public static Bitmap reduceImage(Bitmap bitmap) {
-		System.out.println("reduceImage");
-		float scale = SIZE_WIDTH / (float) bitmap.getWidth();
-		if (scale >= 1) {
-			return bitmap;
-		}
-		return reduceImage(bitmap, scale);
-	}
+    public static Bitmap reduceImage(Bitmap bitmap, float scale) {
+        final Bitmap oldBitmap = bitmap;
+        System.out.println(bitmap.getWidth() + "," + bitmap.getHeight());
+        bitmap = Bitmap.createScaledBitmap(oldBitmap, (int) (bitmap.getWidth()
+                * scale + 1f), (int) (bitmap.getHeight() * scale + 1f), true);
+        oldBitmap.recycle();
+        return bitmap;
+    }
+    
+    public static Bitmap reduceImage(Bitmap bitmap) {
+        System.out.println("reduceImage");
+        float scale = SIZE_WIDTH / (float) bitmap.getWidth();
+        if (scale >= 1) {
+            return bitmap;
+        }
+        return reduceImage(bitmap, scale);
+    }
 {% endhighlight %}
 
 先调用第二个的reduceImage()方法，然后第二个的reduceImage()方法又调用第一个的reduceImage()方法，接着第一个的reduceImage()方法内部就会调用createScaledBitmap()方法把Bitmap进行压缩，生成新的Bitmap，然后释放掉原来的Bitmap。
@@ -260,16 +260,16 @@ BitmapCacheBin类实现的主要的部分就是这些，大家可以在这个的
 另外要想继续完善的话，还可以考虑对生成Bitmap对象时进行异常捕获，然后对异常进行处理：
 
 {% highlight java linenos %}
-	try {
-		// 实例化Bitmap
-		bitmap = BitmapFactory.decodeFile(path);
-	} catch (OutOfMemoryError e) {
-		// 相应的处理，可以释放掉某些Bitmap缓存
-	}
-	if (bitmap == null) {
-		// 如果实例化失败 返回默认的Bitmap对象
-		return defaultBitmapMap;
-	}
+    try {
+        // 实例化Bitmap
+        bitmap = BitmapFactory.decodeFile(path);
+    } catch (OutOfMemoryError e) {
+        // 相应的处理，可以释放掉某些Bitmap缓存
+    }
+    if (bitmap == null) {
+        // 如果实例化失败 返回默认的Bitmap对象
+        return defaultBitmapMap;
+    }
 {% endhighlight %}
 
 详细可以查看下面的链接：
@@ -281,22 +281,22 @@ BitmapCacheBin类实现的主要的部分就是这些，大家可以在这个的
 在说说软引用，软引用的使用其实很简单，下面给出一些实现的代码：
 
 {% highlight java linenos %}
-	public class CacheBin<T> {
-		private final HashMap<String, SoftReference<T>> cacheMap = new HashMap<String, SoftReference<T>>();
-	
-		public void put(String key, T value) {
-			cacheMap.put(key, new SoftReference<T>(value));
-		}
-	
-		public T get(String key) {
-			T value = null;
-			SoftReference<T> reference = cacheMap.get(key);
-			if (reference != null) {
-				value = reference.get();
-			}
-			return value;
-		}
-	}
+    public class CacheBin<T> {
+        private final HashMap<String, SoftReference<T>> cacheMap = new HashMap<String, SoftReference<T>>();
+    
+        public void put(String key, T value) {
+            cacheMap.put(key, new SoftReference<T>(value));
+        }
+    
+        public T get(String key) {
+            T value = null;
+            SoftReference<T> reference = cacheMap.get(key);
+            if (reference != null) {
+                value = reference.get();
+            }
+            return value;
+        }
+    }
 {% endhighlight %}
 
 很明显，同样需要实现put()和get()方法。另外还有其他的软引用的例子，请查看：
@@ -314,11 +314,11 @@ BitmapCacheBin类实现的主要的部分就是这些，大家可以在这个的
 另外还可以尝试结合异步操作，并且记录需要设置的ImageView来改进，这本人还在尝试中。
 
 {% highlight java linenos %}
-	Class PreLoadCaches{
-		Bitmap []bitmap;
-		ImageView []imageView;
-		//……
-	}
+    class PreLoadCaches{
+        Bitmap []bitmap;
+        ImageView []imageView;
+        //……
+    }
 {% endhighlight %}
 
 好了！散吧……
