@@ -15,7 +15,7 @@ cnzz:
 weibo: janseon
 
 gems: [jekyll-paginate]
-paginate: 20
+paginate: 15
 truncate: true
 about: "大兴兴 (Janseon)"
 
