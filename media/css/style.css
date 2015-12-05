@@ -34,15 +34,16 @@ blockquote p{margin:0;padding:.5em 0;}
 .content img{max-width:800px;min-width:500px;display:block;margin:6px auto;-webkit-box-shadow:#999 1px 1px 4px;-moz-box-shadow:#999 1px 1px 4px;box-shadow:#999 1px 1px 4px;}
 #tag_cloud{margin-bottom: 1em;}
 #tag_cloud a:hover{color:#333333 !important;text-decoration:none;}
-.listing-item,.listing-seperator{list-style-type:none;}
+.listing-item,.listing-seperator{list-style-type:none;margin-top:5px;}
 .listing-item a{
 	padding:.2em 1em;
+	font-size: 20px;
 }
 
-.listing-item time{color:#888888;}
-.listing-seperator{font-weight:bold;}
+.listing-item time{color:#888888;font-size: 20px;}
+.listing-seperator{font-weight:bold; font-size: 20px;}
 .meta{font-size:12px;color:#888;}
-.pageNav{font-weight:bold;font-size:17px;}
+.pageNav{font-weight:bold;font-size:18px;}
 .pageNavInvalid{font-weight:bold;font-size:17px;color:#D0D0D0;}
 header{padding:.5em 0;border-bottom: 1px solid #cccccc;}
 nav{font-family:"Electrolize",sans-serif;font-size:1.1em;text-transform:uppercase;float:left;margin-left:-8em;width:6em;text-align:center;}
