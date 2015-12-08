@@ -8,7 +8,6 @@ excerpt: Afinal是什么，到github看看吧
 ---
 
 Afinal是什么，到github看看吧：[Afinal](https://github.com/yangfuhai/afinal)
-<p></p>
 
 该文章中，为Afinal扩展了什么，可以到我的github看看：[Afinal扩展](https://github.com/Janseon/afinal)
 <p></p>
