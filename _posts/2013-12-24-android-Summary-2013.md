@@ -116,7 +116,7 @@ excerpt: Android学习过程  1、认识：  认识选择开发android的原因�
 六、注意事项
 ------
 
->* 请参考资料库的《Android项目开发注意事项》 ……
+>* 请参考资料库的[《Android项目开发注意事项》](https://janseon.github.io/android-note/) ……
 * 一款应用只应该有一个签名，并且要保管好签名文件，策划和程序各一份保存；
 * 要区分好version Name和version Code，version Name 表示版本名称，是字符串，而version Code 表示版本号，是整型数字；version Code每次发布的时候都应该递增。
 <p></p>
