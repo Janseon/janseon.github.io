@@ -41,4 +41,4 @@ excerpt: 客户端需要使用AudioRecord、AudioTrack、Thread、UDP/TCP、Spee
 
 现在客户端已经实现了一个一边录制和speex编码，一边speex解码和播放的的demo。
 
-[Recorder](https://github.com/Janseon/Recorder)
+* [Recorder](https://github.com/Janseon/Recorder)
