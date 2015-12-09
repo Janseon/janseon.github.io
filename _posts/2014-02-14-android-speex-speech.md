@@ -40,3 +40,5 @@ excerpt: 客户端需要使用AudioRecord、AudioTrack、Thread、UDP/TCP、Spee
 4. 对端一旦接受了呼叫，那么这两个将要对话的客户端就会在这个语音转发服务器都建立了连接，这时候，这两个客户端就可以通过这个服务端的转发，实时地发送和接收语音了。
 
 现在客户端已经实现了一个一边录制和speex编码，一边speex解码和播放的的demo。
+
+[Recorder](https://github.com/Janseon/Recorder)
